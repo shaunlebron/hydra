@@ -47,7 +47,6 @@ var playState = {
 			a += 360;
 		}
 		var da = targetAngle - a;
-		console.log(this.head.angle, targetAngle, a,da);
 		if (da > 180) {
 			da -= 360;
 		}
