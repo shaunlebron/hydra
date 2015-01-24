@@ -27,8 +27,8 @@ var menuState = {
 	},
 
 	start: function(){
-		this.loop.destroy();
-		// game.state.start('play');
+		// this.loop.destroy();
+		game.state.start('play');
 	}
 };
 
