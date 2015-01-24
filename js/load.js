@@ -10,7 +10,7 @@ var loadState = {
 		var progressBar = game.add.sprite(game.world.centerX, 2, 'progressBar');
 		progressBar.anchor.setTo(0.5,0.5);
 		game.load.setPreloadSprite(progressBar);
-
+		game.load.spritesheet('hydraTile','assets/HydraTile.png',64,64);
 		
 	},
 
