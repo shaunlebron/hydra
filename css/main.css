@@ -1,3 +1,15 @@
+
+html{
+	text-align: center;
+}
 body {
-  background: #333;
+	text-align: center;
+	background-color: #333;
+    margin: 10px auto;
+    display: inline-block;
+    color: #D5D5D5;
+}
+div{
+	text-align: center;
+	margin: 0 auto;
 }
