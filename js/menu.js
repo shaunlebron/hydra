@@ -8,8 +8,11 @@ var menuState = {
 			{ font: '100px ' + game.global.font, fill: '#ffffff', align: 'center'});
 		nameLabel.anchor.setTo(0.5,0.5);
 
-		var instructLabel = game.add.text(game.world.centerX, game.world.height-256,
-			'occupy the most spaces\nbefore you run out of moves!',
+		var titleScreen = game.add.image(game.world.centerX, game.world.centerY, 'title');
+		titleScreen.anchor.setTo(0.5,0.5);
+
+		var instructLabel = game.add.text(game.world.centerX, game.world.height-275,
+			'insert some instructions\nright here maybe...',
 			{font:'35px ' + game.global.font, fill: '#ffffff', align:'center'});
 		instructLabel.anchor.setTo(0.5,0.5);
 
