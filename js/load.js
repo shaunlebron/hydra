@@ -10,6 +10,7 @@ var loadState = {
 		var progressBar = game.add.sprite(game.world.centerX, 2, 'progressBar');
 		progressBar.anchor.setTo(0.5,0.5);
 		game.load.setPreloadSprite(progressBar);
+		game.load.spritesheet('head', 'assets/HydraAnim.png', 64, 64);
 		game.load.image('HydraTile', 'assets/HydraTile.png');
 		game.load.image('Walls', 'assets/HydraTilePac.png');
 		game.load.tilemap('map01', 'assets/tilemap.json', null, Phaser.Tilemap.TILED_JSON);
