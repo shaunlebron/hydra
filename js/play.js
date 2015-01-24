@@ -40,8 +40,22 @@ var playState = {
 		return turns;
 	},
 
-	rotateHead: function(angle) {
-		game.add.tween(this.head).to({angle: angle}, 200, Phaser.Easing.Linear.None, true);
+	rotateHead: function(targetAngle) {
+
+		var a = this.head.angle % 360;
+		if (a < 0) {
+			a += 360;
+		}
+		var da = targetAngle - a;
+		console.log(this.head.angle, targetAngle, a,da);
+		if (da > 180) {
+			da -= 360;
+		}
+		else if (da < -180) {
+			da += 360;
+		}
+
+		game.add.tween(this.head).to({angle: this.head.angle+da}, 200, Phaser.Easing.Linear.None, true);
 	},
 
 	createWorld: function() {
