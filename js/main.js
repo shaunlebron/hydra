@@ -1,13 +1,11 @@
-var Hydra = Hydra || (function(){
+var Hydra = Hydra || {};
 
-  function start() {
+(function(){
+
+  Hydra.start = function() {
     console.log("Hello World");
   }
 
-
-  return {
-    start: start,
-  };
 
 })();
 
