@@ -8,6 +8,15 @@ function getTile(pixelX,pixelY) {
 	};
 }
 
+function getCenterPixel(pixelX, pixelY) {
+	var size = game.global.tileSize;
+	var tile = getTile(pixelX, pixelY);
+	return {
+		x: Math.floor((tile.x + 0.5) * size),
+		y: Math.floor((tile.y + 0.5) * size),
+	};
+}
+
 function normalizeAngle(a) {
 	var a = a % 360;
 	if (a < 0) {
@@ -23,6 +32,22 @@ var STATUS_SPAWNING = 3;
 
 var playState = {
 
+	emptyTile: function(tileX, tileY) {
+		var collide = this.map.getTile(tileX, tileY, this.collideLayer);
+		var body =		this.map.getTile(tileX, tileY, this.bodyLayer);
+		if (collide) {
+			collide = collide.index;
+		}
+		if (body) {
+			body = body.index;
+		}
+		
+		var onPath =		  (collide === 1);
+		var bodyPresent = (body === 0);
+
+		return (onPath && !bodyPresent);
+	},
+
 	getAvailableTurns: function(tileX, tileY) {
 		var tilesToCheck = [
 			// TODO: add direction to each element
@@ -35,13 +60,7 @@ var playState = {
 		for (i=0; i<4; i++) {
 
 			var t = tilesToCheck[i];
-			var collide = this.map.getTile(t.x, t.y, this.collideLayer);
-			var body =		this.map.getTile(t.x, t.y, this.bodyLayer);
-
-			var onPath =		  (collide === 1);
-			var bodyPresent = (body === 0);
-
-			if (onPath && !bodyPresent) {
+			if (this.emptyTile(t.x, t.y)) {
 				turns.push(t);
 			}
 		}
@@ -99,7 +118,6 @@ var playState = {
 			dirX: 1,
 			dirY: 0,
 			speed: 200,
-			faceDir: 0,
 			frame: 0,
 			status: STATUS_ALIVE,
 		};
@@ -127,8 +145,17 @@ var playState = {
 	},
 
 	move: function (dt) {
-		this.head.x += this.player.dirX * this.player.speed * dt;
-		this.head.y += this.player.dirY * this.player.speed * dt;
+
+		var x = this.head.x;
+		var y = this.head.y;
+		var dx = this.player.dirX * this.player.speed * dt;
+		var dy = this.player.dirY * this.player.speed * dt;
+
+		var tile = getTile(x,y);
+		var center = getCenterPixel(x,y);
+
+		this.head.x += dx;
+		this.head.y += dy;
 	},
 
 	update: function() {
