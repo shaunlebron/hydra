@@ -1,13 +1,6 @@
-var Hydra = Hydra || (function(){
+var Hydra = Hydra || {};
 
-  function start() {
-    console.log("Hello World");
-  }
-
-
-  return {
-    start: start,
-  };
-
-})();
+Hydra.start = function() {
+  console.log("Hello World");
+}
 
