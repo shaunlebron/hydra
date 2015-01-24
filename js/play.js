@@ -40,6 +40,10 @@ var playState = {
 		return turns;
 	},
 
+	rotateHead: function(angle) {
+		game.add.tween(this.head).to({angle: angle}, 200, Phaser.Easing.Linear.None, true);
+	},
+
 	createWorld: function() {
 		this.map = game.add.tilemap('map01');
 		this.map.addTilesetImage('HydraTile');
@@ -66,6 +70,15 @@ var playState = {
 		this.head.animations.play('eat');
 		this.head.angle = 90;
 
+		this.keyUp = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+		this.keyDown = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+		this.keyLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+		this.keyRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+
+		this.keyUp.onDown.add(function() {    this.rotateHead(0); }, this);
+		this.keyDown.onDown.add(function() {  this.rotateHead(180); }, this);
+		this.keyLeft.onDown.add(function() {  this.rotateHead(270); }, this);
+		this.keyRight.onDown.add(function() { this.rotateHead(90); }, this);
 	},
 
 	create: function() {
