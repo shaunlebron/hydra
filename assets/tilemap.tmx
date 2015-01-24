@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="16" height="16" tilewidth="64" tileheight="64" nextobjectid="1">
+ <tileset firstgid="1" name="hydra" tilewidth="64" tileheight="64">
+  <image source="HydraTile.png" width="1024" height="64"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="16" height="16">
+  <data encoding="base64" compression="zlib">
+   eJylktsOgCAMQ7l4RQn//7fyAEmzrFPkoUHArmdh3jnnJ7VUbUKHcobawX8pNbUzdm/5JduqeG6FK7V9GcyXLIyjEE/PlZysrsWI/7G6rP/Y1vNn/+z9ouEJVVlhQu7eRyb5X+cHJbOwPr4bzvTb/I7MSVLyJUcg37N6ABM8BAw=
+  </data>
+ </layer>
+</map>
