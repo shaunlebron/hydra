@@ -5,7 +5,7 @@ var menuState = {
 	create: function  () {
 
 		var nameLabel = game.add.text(game.world.centerX, game.world.centerY -128, 'Hydra',
-			{ font: '150px ' + game.global.font, fill: '#ffffff', align: 'center' });
+			{ font: '100px ' + game.global.font, fill: '#ffffff', align: 'center' });
 		nameLabel.anchor.setTo(0.5,0.5);
 
 		var instructLabel = game.add.text(game.world.centerX, game.world.height-256,
