@@ -8,6 +8,14 @@ function getTile(pixelX,pixelY) {
 	};
 }
 
+function normalizeAngle(a) {
+	var a = a % 360;
+	if (a < 0) {
+		a += 360;
+	}
+	return a;
+}
+
 var STATUS_ALIVE = 0;
 var STATUS_DYING = 1;
 var STATUS_DEAD = 2;
@@ -42,10 +50,11 @@ var playState = {
 
 	rotateHead: function(targetAngle) {
 
-		var a = this.head.angle % 360;
-		if (a < 0) {
-			a += 360;
-		}
+		var a = normalizeAngle(this.head.angle);
+
+		// TODO: verify if we can turn
+
+
 		var da = targetAngle - a;
 		if (da > 180) {
 			da -= 360;
@@ -54,7 +63,27 @@ var playState = {
 			da += 360;
 		}
 
-		game.add.tween(this.head).to({angle: this.head.angle+da}, 200, Phaser.Easing.Linear.None, true);
+		game.add.tween(this.head).to({angle: this.head.angle+da}, 100, Phaser.Easing.Linear.None, true);
+
+		var a = normalizeAngle(targetAngle);
+		switch (a) {
+			case 0:
+				this.player.dirX = 0;
+				this.player.dirY = -1;
+				break;
+			case 90:
+				this.player.dirX = 1;
+				this.player.dirY = 0;
+				break;
+			case 180:
+				this.player.dirX = 0;
+				this.player.dirY = 1;
+				break;
+			case 270:
+				this.player.dirX = -1;
+				this.player.dirY = 0;
+				break;
+		}
 	},
 
 	createWorld: function() {
@@ -67,10 +96,9 @@ var playState = {
 
 
 		this.player = {
-			x: 0,
-			y: game.global.tileSize * 6.5,
-			vx: 0,
-			vy: 0,
+			dirX: 1,
+			dirY: 0,
+			speed: 200,
 			faceDir: 0,
 			frame: 0,
 			status: STATUS_ALIVE,
@@ -98,7 +126,13 @@ var playState = {
 		this.createWorld();
 	},
 
+	move: function (dt) {
+		this.head.x += this.player.dirX * this.player.speed * dt;
+		this.head.y += this.player.dirY * this.player.speed * dt;
+	},
+
 	update: function() {
+		this.move(game.time.elapsed / 1000);
 	},
 };
 
