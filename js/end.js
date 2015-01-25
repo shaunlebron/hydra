@@ -9,24 +9,24 @@ var endState = {
 		endScreen.anchor.setTo(0.5,0.5);
 
 		var player1Label = game.add.text(game.world.centerX - 150, 380, '1',
-			{ font: '150px ' + 'Hydra', fill: '#ffffff'});
+			{ font: '150px ' + 'Hydra', fill: '#ffffff', align: 'center'});
 		player1Label.anchor.setTo(0.5,0.5);
 
-		var player2Label = game.add.text(game.world.centerX+ 200, 380, '2',
-			{ font: '150px ' + 'Hydra', fill: '#ffffff'});
+		var player2Label = game.add.text(game.world.centerX+ 150, 380, '2',
+			{ font: '150px ' + 'Hydra', fill: '#ffffff', align: 'center'});
 		player2Label.anchor.setTo(0.5,0.5);
 
-		var title = game.add.text(game.world.centerX, 150, 'Winner',
-			{ font: '80px ' + 'Hydra', fill: '#ffffff'});
+		var title = game.add.text(game.world.centerX, 200, 'Winner',
+			{ font: '80px ' + 'Hydra', fill: '#ffffff', align: 'center'});
 		title.anchor.setTo(0.5,0.5);
 
 		player1Label.text = game.global.playerScores[0];
 		player2Label.text = game.global.playerScores[1];
 		if (game.global.lastWinner == 0){
-			player1Label.setStyle({font: '150px ' + 'Hydra',fill: '#f4d448'});
+			player1Label.setStyle({font: '150px ' + 'Hydra',fill: '#f4d448', align: 'center'});
 			title.text = 'Player 1 Wins';
 		} else {
-			player2Label.setStyle({font: '150px ' + 'Hydra',fill: '#f4d448'});
+			player2Label.setStyle({font: '150px ' + 'Hydra',fill: '#f4d448', align: 'center'});
 			title.text = 'Player 2 Wins'; 
 		}
 		
