@@ -212,7 +212,7 @@ var STATUS_ALIVE = 0;
 var STATUS_DYING = 1;
 var STATUS_WAITING = 2;
 var STATUS_SPAWNING = 3;
-var STATUS_UNWIND = 4;
+var STATUS_REWIND = 4;
 
 var BODY_EMPTY = 16; // spritesheet cell for empty
 
@@ -227,6 +227,8 @@ var LITTLE_GONE = 6;
 var playState = {
 
 	create: function() {
+		this.gameOver = false;
+
 		this.createWorld();
 
 		this.initBodyParts();
@@ -398,6 +400,9 @@ var playState = {
 
 		var player = this.players[i];
 		player.dir = { x: dir.x, y: dir.y };
+
+		if (player.status == STATUS_REWIND) {
+		}
 
 		// add exit to previous body tile if applicable
 		try {
@@ -662,7 +667,9 @@ var playState = {
 			this.addDeadHead(player.dir, tile);
 
 			setTimeout(function(){
-				this.spawnQueue.push(player.index);
+				if (!this.gameOver) {
+					this.spawnQueue.push(player.index);
+				}
 			}.bind(this), 500);
 
 		}.bind(this), 300);
@@ -670,12 +677,13 @@ var playState = {
 	},
 
 	crownWinner: function(player, tile) {
+		this.gameOver = true;
 		this.person.status = PERSON_EATEN;
 		var i,p;
 		for (i=0; i<this.numPlayers; i++) {
 			p = this.players[i];
-			if (i != player.index) {
-				p.status = STATUS_UNWIND;
+			if (i != player.index && player.status == STATUS_ALIVE) {
+				p.status = STATUS_REWIND;
 			}
 		}
 	},
@@ -757,6 +765,9 @@ var playState = {
 			this.tryTurn(player.index, player.nextAngle);
 		}
 
+	},
+
+	rewindPlayer: function(i, dt) {
 	},
 
 	update: function() {
