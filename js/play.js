@@ -119,11 +119,25 @@ var STATUS_DYING = 1;
 var STATUS_DEAD = 2;
 var STATUS_SPAWNING = 3;
 
+
+// TODO: most functions need to take a player object so they are specific to it
+
 var playState = {
 
 	create: function() {
 		this.createWorld();
+
+		this.deadHeads = [];
+		this.spawnQueue = [];
+		this.spawnLocations = []; // {dir:{}, tile:{}}
+
+		this.setupPlayerControls();
+
+		// TODO: spawn first player, and queue up second player
 		this.createPlayer();
+	},
+
+	setupPlayerControls: function() {
 	},
 
 	createWorld: function() {
@@ -134,6 +148,7 @@ var playState = {
 		this.wallLayer = this.map.createLayer('Walls');
 	},
 
+	// TODO: rename to spawnPlayer(dir,tileX,tileY), returns new player
 	createPlayer: function() {
 		this.player = {
 			dir: { x: 1, y: 0},
@@ -151,6 +166,7 @@ var playState = {
 		var a = this.bodyParts[startTile.x][startTile.y];
 		a.enter = {x: -1, y: 0};
 
+		// TODO: move head inside player
 		this.head = game.add.sprite(startTile.x*size, (startTile.y+0.5)*size, 'head');
 		this.head.anchor.setTo(0.5,0.5);
 		this.head.frame = 0;
@@ -158,6 +174,7 @@ var playState = {
 		this.head.animations.play('eat');
 		this.head.angle = 90;
 
+		// TODO: move everything below this to new setupPlayer, only called once
 		this.keyUp = game.input.keyboard.addKey(Phaser.Keyboard.UP);
 		this.keyDown = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
 		this.keyLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
@@ -187,6 +204,7 @@ var playState = {
 				bodyParts[x][y] = {
 					enter: null,
 					exits: [],
+					// TODO: don't do this until cell entered for first time
 					sprite: this.makeBodySprite(x,y),
 				};
 			}
@@ -297,10 +315,11 @@ var playState = {
 		if (!this.emptyTile(tile.x+dir.x, tile.y+dir.y)) {
 			if (passedCenterX) nx = center.x;
 			if (passedCenterY) ny = center.y;
+			// TODO: kill head if dead end, or win if person eaten
 		}
 
 		// determine if we have passed the critical drawing point of the tile.
-		var pad = 8;
+		var pad = 8; // FIXME: get a bigger head (no pad size works here)
 		var passedDrawX = (dx > 0 && nx > (center.x+pad)) || (dx < 0 && nx < (center.x-pad));
 		var passedDrawY = (dy > 0 && ny > (center.y+pad)) || (dy < 0 && ny < (center.y-pad));
 
@@ -317,6 +336,7 @@ var playState = {
 		// if we are entering a new tile, set its entrance adjacency
 		var newTile = getTile(nx,ny);
 		if (tile.x != newTile.x || tile.y != newTile.y) {
+			// TODO: add to spawn locations if other paths are open from tile
 			this.bodyParts[newTile.x][newTile.y].enter = { x: -dir.x, y: -dir.y };
 		}
 
@@ -337,6 +357,7 @@ var playState = {
 
 	update: function() {
 		this.move(game.time.elapsed / 1000);
+		// TODO: try spawning any queued players at available forks
 	},
 };
 
