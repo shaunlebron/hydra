@@ -443,6 +443,18 @@ var playState = {
 		}
 	},
 
+	addDeadHead: function(tileX, tileY) {
+	},
+
+	killPlayer: function(player) {
+		player.status = STATUS_WAITING;
+		// TODO: remove player.head from game
+		// TODO: this.addDeadHead();
+		setTimeout(function(){
+			this.spawnQueue.push(player.index);
+		}.bind(this), 500);
+	},
+
 	movePlayer: function (pi, dt) {
 
 		var player = this.players[pi];
@@ -471,7 +483,11 @@ var playState = {
 		if (!this.emptyTile(tile.x+dir.x, tile.y+dir.y)) {
 			if (passedCenterX) nx = center.x;
 			if (passedCenterY) ny = center.y;
-			// TODO: kill head if dead end, or win if person eaten
+
+			if (this.getAvailableDirections(tile.x, tile.y).length == 0) {
+				// TODO: win if found person
+				this.killPlayer(player);
+			}
 		}
 
 		// determine if we have passed the critical drawing point of the tile.
