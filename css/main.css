@@ -17,3 +17,12 @@ div{
 	text-align: center;
 	margin: 0 auto;
 }
+
+#links {
+  margin-top: 12px;
+}
+
+#links a {
+  color: #ddd;
+  text-decoration: none;
+}
