@@ -11,6 +11,7 @@ var loadState = {
 		progressBar.anchor.setTo(0.5,0.5);
 		game.load.setPreloadSprite(progressBar);
 		game.load.image('title', 'assets/HydraTitle.png');
+		game.load.image('end', 'assets/HydraEnd.png');
 		game.load.spritesheet('BodyBlue', 'assets/HydraBodyBlue.png', 64, 64);
 		game.load.spritesheet('BodyPurple', 'assets/HydraBodyPurple.png', 64, 64);
 		game.load.spritesheet('HeadBlue', 'assets/HydraAnim.png', 64, 64);
@@ -25,6 +26,7 @@ var loadState = {
 		game.load.audio('Spawn', ['assets/PlayerSpawn.ogg', 'assets/PlayerSpawn.mp3']);
 		game.load.audio('Space', ['assets/SpacePress.ogg', 'assets/SpacePress.mp3']);
 		game.load.audio('Rewind', ['assets/HydraRewind.ogg', 'assets/HydraRewind.mp3']);
+		game.load.audio('EndMusic', ['assets/HydraEnd.ogg', 'assets/HydraEnd.mp3']);
 	},
 
 	create: function(){

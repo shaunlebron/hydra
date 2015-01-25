@@ -21,6 +21,9 @@ var endState = {
 
 		var spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 		spaceKey.onDown.addOnce(this.start, this);
+
+		this.music = game.add.sound('EndMusic',0.75,false);
+		this.music.play();
 	},
 
 	start: function(){
