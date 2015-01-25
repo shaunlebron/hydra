@@ -420,6 +420,8 @@ var playState = {
 		player.head.animations.play('eat');
 		player.head.angle = dirToAngle(dir);
 
+		this.updatePreviousHeadCounts(dir, tile, 1);
+
 		this.enterNewTile(player, dir, tile);
 
 		// bring to life
@@ -442,6 +444,7 @@ var playState = {
 			bodyParts[x] = [];
 			for (y=0; y<this.map.height; y++) {
 				bodyParts[x][y] = {
+					heads: 0,
 					enter: null,
 					exits: [],
 					sprite: null,
@@ -460,6 +463,7 @@ var playState = {
 	enterNewTile: function(player, dir, tile) {
 		var bodyPart = this.bodyParts[tile.x][tile.y];
 
+		bodyPart.heads++;
 		bodyPart.sprite = this.makeBodySprite(player.index, tile.x, tile.y);
 		bodyPart.enter = {x: -dir.x, y: -dir.y};
 
@@ -555,6 +559,47 @@ var playState = {
 		return dirs;
 	},
 
+	debugHeadCounts: function() {
+		var x,y;
+		console.log("========================================");
+		for (y=0; y<this.map.height; y++) {
+			var s = "";
+			for (x=0; x<this.map.width; x++) {
+				s += " " + this.bodyParts[x][y].heads;
+			}
+			console.log(s);
+		}
+	},
+
+	updatePreviousHeadCounts: function(dir, tile, delta) {
+
+		// create temps
+		var tileX = tile.x;
+		var tileY = tile.y;
+		var dirX = -dir.x;
+		var dirY = -dir.y;
+
+		while (true) {
+			// move tile
+			tileX += dirX;
+			tileY += dirY;
+
+			// try to get bodyPart if inside map, exit if not
+			var bodyPart;
+			try {
+				bodyPart = this.bodyParts[tileX][tileY];
+			}
+			catch (e) {
+				return;
+			}
+
+			bodyPart.heads += delta;
+			dirX = bodyPart.enter.x;
+			dirY = bodyPart.enter.y;
+		}
+
+	},
+
 	tryTurn: function(pi, targetAngle) {
 
 		var player = this.players[pi];
@@ -607,6 +652,10 @@ var playState = {
 	killPlayer: function(player, tile) {
 		// TODO: kick off bomb animation
 		player.status = STATUS_WAITING;
+
+		this.bodyParts[tile.x][tile.y].heads--;
+		this.updatePreviousHeadCounts(player.dir, tile, -1);
+
 		setTimeout(function(){
 			player.head.kill();
 
