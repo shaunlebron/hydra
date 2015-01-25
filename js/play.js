@@ -36,22 +36,82 @@ function angleToDir(a) {
 	return { x: dx, y: dy };
 }
 
+function tileIndexFromStraight(enter, exit) {
+	if (enter.x == -1 && exit.x == 1) {
+		return 2; // moving >
+	}
+	else if (enter.x == 1 && exit.x == -1) {
+		return 4; // moving <
+	}
+	else if (enter.y == -1 && exit.y == 1) {
+		return 1; // moving ^
+	}
+	else if (enter.y == 1 && exit.y == -1) {
+		return 3; // moving v
+	}
+	return null;
+}
+
+function tileIndexFromAll(all) {
+	var master = 0;
+	//    1
+	// 8     2     (master code for adjacency)
+	//    4
+
+	// (assuming only one xy value is nonzero per element)
+	for (var i=0; i<all.length; i++) {
+		var a = all[i];
+		if (a.x == -1) master += 8;
+		if (a.x ==  1) master += 2;
+		if (a.y == -1) master += 1;
+		if (a.y ==  1) master += 4;
+	}
+
+	var masterToIndex = {
+		0:  0,
+		1:  0,
+		2:  0,
+		3:  7,
+		4:  0,
+		5:  1,
+		6:  5,
+		7:  11,
+		8:  0,
+		9:  8,
+		10: 2,
+		11: 10,
+		12: 6,
+		13: 13,
+		14: 12,
+		15: 0, // no tile for this yet (choosing a T)
+	};
+
+	return masterToIndex[master];
+}
+
 function tileIndexFromAdjacency(adj) {
 	var enter = adj.enter;
 	var exits = adj.exits;
+	var numExits = exits.length;
 
-	if (enter == null || exits.length == 0) {
+	// empty
+	if (enter == null || numExits == 0) {
 		return 0;
 	}
 
-	if (enter.x == -1) {
+	// special case: oriented straight piece
+	var i;
+	if (numExits == 1) {
+		i = tileIndexFromStraight(enter, exits[0]);
+		if (i != null) return i;
 	}
-	else if (enter.x == 1) {
+
+	// general case
+	var all = [enter];
+	for (i=0; i<numExits; i++) {
+		all.push(exits[i]);
 	}
-	else if (enter.y == -1) {
-	}
-	else if (enter.y = 1) {
-	}
+	return tileIndexFromAll(all);
 }
 
 var STATUS_ALIVE = 0;
