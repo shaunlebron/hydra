@@ -215,17 +215,29 @@ var STATUS_SPAWNING = 3;
 
 var BODY_EMPTY = 16; // spritesheet cell for empty
 
+var PERSON_IDLE = 0;
+var PERSON_EATEN = 1;
+var PERSON_LEAVING = 2;
+
+var LITTLE_HERE = 0;
+var LITTLE_BOMB = 3;
+var LITTLE_GONE = 6;
+
 var playState = {
 
 	create: function() {
 		this.createWorld();
 
 		this.initBodyParts();
+		this.initDeadEnds();
 
 		this.numPlayers = 2;
 		this.players = [];
 		this.initPlayers();
 		this.setupPlayerControls();
+
+		this.initPerson();
+		this.teleportPerson();
 
 		this.deadHeads = [];
 		this.spawnQueue = [];
@@ -238,6 +250,65 @@ var playState = {
 		this.initSpawnQueue();
 
 		this.dispatchSpawn();
+	},
+
+	makeDeadEndSprite: function(tileX, tileY) {
+		var size = game.global.tileSize;
+		var x = tileX*size;
+		var y = tileY*size;
+		var s = game.add.sprite(x, y, 'LittleMan');
+		s.frame = LITTLE_GONE;
+		return s;
+	},
+
+	initDeadEnds: function() {
+		var deadEnds = [];
+		var x,y;
+		for (x=0; x<this.map.width; x++) {
+			deadEnds[x] = [];
+			for (y=0; y<this.map.height; y++) {
+				var s = null;
+				if (this.canPersonTeleportHere(x,y)) {
+					s = this.makeDeadEndSprite(x,y);
+				}
+				deadEnds[x][y] = { sprite: s };
+			}
+		}
+		this.deadEnds = deadEnds;
+	},
+
+	initPerson: function() {
+		this.person = {
+			tileX: null,
+			tileY: null,
+			status: PERSON_IDLE,
+		};
+	},
+
+	teleportPerson: function() {
+		if (this.person.status == PERSON_EATEN) {
+			return;
+		}
+
+		var tiles = this.getTeleportableTiles();
+		if (tiles.length > 0) {
+
+			try {
+				this.deadEnds[this.person.tileX][this.person.tileY].sprite.frame = LITTLE_GONE;
+			}
+			catch (e) {}
+
+			var i = Math.floor(Math.random() * tiles.length);
+			var tile = tiles[i];
+
+			this.person.tileX = tile.x;
+			this.person.tileY = tile.y;
+
+			this.deadEnds[tile.x][tile.y].sprite.frame = LITTLE_HERE;
+
+			var delay = Math.random()*3000 + 1000;
+			setTimeout(this.teleportPerson.bind(this), delay);
+		}
 	},
 
 	makePlayer: function(i) {
