@@ -4,6 +4,7 @@ var game = new Phaser.Game(1024, 1024, Phaser.AUTO, 'gameDiv');
 
 game.global = { 
 	tileSize: 64,
+	playerColors: ['BodyBlue','BodyPurple'],
 };
 
 game.state.add('boot', bootState);

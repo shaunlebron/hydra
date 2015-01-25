@@ -25,6 +25,16 @@ function normalizeAngle(a) {
 	return a;
 }
 
+function shortenAngleDistance(da) {
+	if (da > 180) {
+		da -= 360;
+	}
+	else if (da < -180) {
+		da += 360;
+	}
+	return da;
+}
+
 function angleToDir(a) {
 	var dx,dy;
 	switch (normalizeAngle(a)) {
@@ -34,6 +44,21 @@ function angleToDir(a) {
 		case 270: dx = -1; dy =  0; break;
 	}
 	return { x: dx, y: dy };
+}
+
+function dirToAngle(dir) {
+	if (dir.x == -1) {
+		return 270;
+	}
+	else if (dir.x == 1) {
+		return 90;
+	}
+	else if (dir.y == -1) {
+		return 0;
+	}
+	else if (dir.y == 1) {
+		return 180;
+	}
 }
 
 function tileIndexFromStraight(enter, exit) {
@@ -114,30 +139,110 @@ function tileIndexFromAdjacency(adj) {
 	return tileIndexFromAll(all);
 }
 
+function getSpawnPixel(dir, tile) {
+	var size = game.global.tileSize;
+
+	var dx,dy;
+	if (dir.x == -1) {
+		dx = size-1;
+		dy = size/2;
+	}
+	else if (dir.x == 1) {
+		dx = 0;
+		dy = size/2;
+	}
+	else if (dir.y == -1) {
+		dx = size/2;
+		dy = size-1;
+	}
+	else if (dir.y == 1) {
+		dx = size/2;
+		dy = 0;
+	}
+
+	return {
+		x: tile.x * size + dx,
+		y: tile.y * size + dy,
+	};
+}
+
 var STATUS_ALIVE = 0;
 var STATUS_DYING = 1;
-var STATUS_DEAD = 2;
+var STATUS_WAITING = 2;
 var STATUS_SPAWNING = 3;
 
-
-// TODO: most functions need to take a player object so they are specific to it
+var BODY_EMPTY = 13; // spritesheet cell for empty
 
 var playState = {
 
 	create: function() {
 		this.createWorld();
 
-		this.deadHeads = [];
-		this.spawnQueue = [];
-		this.spawnLocations = []; // {dir:{}, tile:{}}
+		this.initBodyParts();
 
+		this.numPlayers = 2;
+		this.players = [];
+		this.initPlayers();
 		this.setupPlayerControls();
 
-		// TODO: spawn first player, and queue up second player
-		this.createPlayer();
+		this.deadHeads = [];
+		this.spawnQueue = [];
+		this.spawnLocations = [
+			{
+				dir: {x: 1, y: 0},
+				tile: {x: 0, y: 6},
+			}
+		];
+		this.initSpawnQueue();
+
+		this.dispatchSpawn();
+	},
+
+	makePlayer: function(i) {
+		return {
+			index: i,
+			dir: { x: 1, y: 0},
+			speed: 400,
+			frame: 0,
+			status: STATUS_WAITING,
+		};
+	},
+
+	initSpawnQueue: function() {
+		var i;
+		for (i=0; i<this.numPlayers; i++) {
+			this.spawnQueue.push(i);
+		}
+	},
+
+	initPlayers: function() {
+		var i;
+		for (i=0; i<this.numPlayers; i++) {
+			this.players[i] = this.makePlayer(i);
+		}
 	},
 
 	setupPlayerControls: function() {
+
+		this.keyArrowUp = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+		this.keyArrowDown = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+		this.keyArrowLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+		this.keyArrowRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+
+		this.keyArrowUp.onDown.add(function() {    this.tryTurn(0,0); }, this);
+		this.keyArrowDown.onDown.add(function() {  this.tryTurn(0,180); }, this);
+		this.keyArrowLeft.onDown.add(function() {  this.tryTurn(0,270); }, this);
+		this.keyArrowRight.onDown.add(function() { this.tryTurn(0,90); }, this);
+
+		this.keyW = game.input.keyboard.addKey(Phaser.Keyboard.W);
+		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);
+		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
+		this.keyD = game.input.keyboard.addKey(Phaser.Keyboard.D);
+
+		this.keyW.onDown.add(function() { this.tryTurn(1,0); }, this);
+		this.keyS.onDown.add(function() { this.tryTurn(1,180); }, this);
+		this.keyA.onDown.add(function() { this.tryTurn(1,270); }, this);
+		this.keyD.onDown.add(function() { this.tryTurn(1,90); }, this);
 	},
 
 	createWorld: function() {
@@ -148,54 +253,53 @@ var playState = {
 		this.wallLayer = this.map.createLayer('Walls');
 	},
 
-	// TODO: rename to spawnPlayer(dir,tileX,tileY), returns new player
-	createPlayer: function() {
-		this.player = {
-			dir: { x: 1, y: 0},
-			speed: 400,
-			frame: 0,
-			status: STATUS_ALIVE,
-		};
+	dispatchSpawn: function() {
+		while (true) {
+			var loc = this.spawnLocations[0];
+			var pi  = this.spawnQueue[0];
+			if (loc == null || pi == null) {
+				break;
+			}
 
-		var startTile = { x: 0, y: 6 };
-		var size = game.global.tileSize;
+			this.spawnQueue.shift();
+			this.spawnLocations.shift();
 
-		this.initBody();
+			var dir = loc.dir;
+			var tile = loc.tile;
 
-		// initialize adjacency of first tile;
-		var a = this.bodyParts[startTile.x][startTile.y];
-		a.enter = {x: -1, y: 0};
-
-		// TODO: move head inside player
-		this.head = game.add.sprite(startTile.x*size, (startTile.y+0.5)*size, 'head');
-		this.head.anchor.setTo(0.5,0.5);
-		this.head.frame = 0;
-		this.head.animations.add('eat', [0,1],8,true);
-		this.head.animations.play('eat');
-		this.head.angle = 90;
-
-		// TODO: move everything below this to new setupPlayer, only called once
-		this.keyUp = game.input.keyboard.addKey(Phaser.Keyboard.UP);
-		this.keyDown = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
-		this.keyLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
-		this.keyRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
-
-		this.keyUp.onDown.add(function() {    this.tryTurn(0); }, this);
-		this.keyDown.onDown.add(function() {  this.tryTurn(180); }, this);
-		this.keyLeft.onDown.add(function() {  this.tryTurn(270); }, this);
-		this.keyRight.onDown.add(function() { this.tryTurn(90); }, this);
+			this.spawnPlayer(pi, dir, tile);
+		}
 	},
 
-	makeBodySprite: function(tileX, tileY) {
+	spawnPlayer: function(i, dir, tile) {
+
+		var player = this.players[i];
+
+		// create head sprite
+		var spawn = getSpawnPixel(dir, tile);
+		player.head = game.add.sprite(spawn.x, spawn.y, 'head');
+		player.head.anchor.setTo(0.5,0.5);
+		player.head.frame = 0;
+		player.head.animations.add('eat', [0,1],8,true);
+		player.head.animations.play('eat');
+		player.head.angle = dirToAngle(dir);
+
+		this.enterNewTile(player, dir, tile);
+
+		// bring to life
+		player.status = STATUS_ALIVE;
+	},
+
+	makeBodySprite: function(pi, tileX, tileY) {
 		var size = game.global.tileSize;
 		var x = tileX*size;
 		var y = tileY*size;
-		var s = game.add.sprite(x, y, 'BodyBlue');
-		s.frame = 13; // empty cell
+		var s = game.add.sprite(x, y, game.global.playerColors[pi]);
+		s.frame = BODY_EMPTY;
 		return s;
 	},
 
-	initBody: function() {
+	initBodyParts: function() {
 		var bodyParts = [];
 		var x,y;
 		for (x=0; x<this.map.width; x++) {
@@ -204,8 +308,7 @@ var playState = {
 				bodyParts[x][y] = {
 					enter: null,
 					exits: [],
-					// TODO: don't do this until cell entered for first time
-					sprite: this.makeBodySprite(x,y),
+					sprite: null,
 				};
 			}
 		}
@@ -216,6 +319,16 @@ var playState = {
 		var bodyPart = this.bodyParts[tileX][tileY];
 		var index = tileIndexFromAdjacency(bodyPart)-1;
 		bodyPart.sprite.frame = index;
+	},
+
+	enterNewTile: function(player, dir, tile) {
+		var bodyPart = this.bodyParts[tile.x][tile.y];
+
+		bodyPart.sprite = this.makeBodySprite(player.index, tile.x, tile.y);
+		bodyPart.enter = {x: -dir.x, y: -dir.y};
+
+		// make sure head is over the new body part
+		player.head.bringToTop();
 	},
 
 	emptyTile: function(tileX, tileY) {
@@ -229,10 +342,10 @@ var playState = {
 		}
 		catch (e) {}
 		
-		var onPath =		  (collide === 1);
-		var bodyPresent = (body < 13);
+		var onPath =		 (collide === 1);
+		var bodyAbsent = (body == null || body == BODY_EMPTY);
 
-		return (onPath && !bodyPresent);
+		return (onPath && bodyAbsent);
 	},
 
 	getAvailableTurns: function(tileX, tileY) {
@@ -254,51 +367,58 @@ var playState = {
 		return turns;
 	},
 
-	tryTurn: function(targetAngle) {
+	tryTurn: function(pi, targetAngle) {
 
-		this.nextAngle = null;
-
-		var dir = angleToDir(targetAngle);
-		var tile = getTile(this.head.x, this.head.y);
-		if (!this.emptyTile(tile.x+dir.x, tile.y+dir.y)) {
-			this.nextAngle = targetAngle;
+		var player = this.players[pi];
+		if (player.status != STATUS_ALIVE) {
 			return;
 		}
 
-		this.player.dir.x = dir.x;
-		this.player.dir.y = dir.y;
+		var head = player.head;
+		player.nextAngle = null;
 
-		var a = normalizeAngle(this.head.angle);
-		var da = targetAngle - a;
-		if (da > 180) {
-			da -= 360;
-		}
-		else if (da < -180) {
-			da += 360;
+		var dir = angleToDir(targetAngle);
+		var tile = getTile(head.x, head.y);
+		if (!this.emptyTile(tile.x+dir.x, tile.y+dir.y)) {
+			player.nextAngle = targetAngle;
+			return;
 		}
 
-		game.add.tween(this.head).to({angle: this.head.angle+da}, 100, Phaser.Easing.Linear.None, true);
+		player.dir.x = dir.x;
+		player.dir.y = dir.y;
+
+		var a = normalizeAngle(head.angle);
+		var da = shortenAngleDistance(targetAngle - a);
+
+		game.add.tween(head).to({angle: head.angle+da}, 100, Phaser.Easing.Linear.None, true);
 	},
 
-	pullTowardTrack: function(dim, trackX, dt) {
-		var x = this.head[dim];
-		var dx = 2 * this.player.speed * dt;
+	pullTowardTrack: function(player, dim, trackX, dt) {
+		var head = player.head;
+
+		var x = head[dim];
+		var dx = 2 * player.speed * dt;
 
 		if (x > trackX) {
-			this.head[dim] = Math.max(trackX, x - dx);
+			head[dim] = Math.max(trackX, x - dx);
 		}
 		else if (x < trackX) {
-			this.head[dim] = Math.min(trackX, x + dx);
+			head[dim] = Math.min(trackX, x + dx);
 		}
 	},
 
-	move: function (dt) {
+	movePlayer: function (pi, dt) {
 
-		var x = this.head.x;
-		var y = this.head.y;
-		var dir = this.player.dir;
-		var dx = dir.x * this.player.speed * dt;
-		var dy = dir.y * this.player.speed * dt;
+		var player = this.players[pi];
+		if (player.status != STATUS_ALIVE) {
+			return;
+		}
+
+		var x = player.head.x;
+		var y = player.head.y;
+		var dir = player.dir;
+		var dx = dir.x * player.speed * dt;
+		var dy = dir.y * player.speed * dt;
 
 		var tile = getTile(x,y);
 		var center = getCenterPixel(x,y);
@@ -330,37 +450,42 @@ var playState = {
 		}
 
 		// update position
-		this.head.x = nx;
-		this.head.y = ny;
+		player.head.x = nx;
+		player.head.y = ny;
 
 		// if we are entering a new tile, set its entrance adjacency
 		var newTile = getTile(nx,ny);
 		if (tile.x != newTile.x || tile.y != newTile.y) {
-			// TODO: add bodySprite for this player's color in this new tile
-			//	- initialize frame to 13 for empty
-			//	- player.head.bringToTop()
+			this.enterNewTile(player, dir, newTile);
 			// TODO: add to spawn locations if other paths are open from tile
-			this.bodyParts[newTile.x][newTile.y].enter = { x: -dir.x, y: -dir.y };
 		}
 
 		// keep player on track
 		if (dy != 0) {
-			this.pullTowardTrack('x', center.x, dt);
+			this.pullTowardTrack(player, 'x', center.x, dt);
 		}
 		if (dx != 0) {
-			this.pullTowardTrack('y', center.y, dt);
+			this.pullTowardTrack(player, 'y', center.y, dt);
 		}
 
 		// try last failed attempted turn if it is available now
-		if (this.nextAngle != null) {
-			this.tryTurn(this.nextAngle);
+		if (player.nextAngle != null) {
+			this.tryTurn(player.index, player.nextAngle);
 		}
 
 	},
 
 	update: function() {
-		this.move(game.time.elapsed / 1000);
-		// TODO: try spawning any queued players at available forks
+
+		// delta time (seconds)
+		var dt = game.time.elapsed / 1000;
+
+		var i;
+		for (i=0; i<this.numPlayers; i++) {
+			this.movePlayer(i, dt);
+		}
+
+		this.dispatchSpawn();
 	},
 };
 
