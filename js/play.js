@@ -402,6 +402,9 @@ var playState = {
 		var player = this.players[i];
 		player.dir = { x: dir.x, y: dir.y };
 
+		if (player.status == STATUS_REWIND) {
+		}
+
 		// add exit to previous body tile if applicable
 		try {
 			var tx = tile.x-dir.x;
@@ -605,15 +608,6 @@ var playState = {
 
 	},
 
-	tweenTurn: function(player, targetAngle) {
-		var head = player.head;
-
-		var a = normalizeAngle(head.angle);
-		var da = shortenAngleDistance(targetAngle - a);
-
-		game.add.tween(head).to({angle: head.angle+da}, 100, Phaser.Easing.Linear.None, true);
-	},
-
 	tryTurn: function(pi, targetAngle) {
 
 		var player = this.players[pi];
@@ -634,7 +628,10 @@ var playState = {
 		player.dir.x = dir.x;
 		player.dir.y = dir.y;
 
-		this.tweenTurn(player, targetAngle);
+		var a = normalizeAngle(head.angle);
+		var da = shortenAngleDistance(targetAngle - a);
+
+		game.add.tween(head).to({angle: head.angle+da}, 100, Phaser.Easing.Linear.None, true);
 	},
 
 	pullTowardTrack: function(player, dim, trackX, dt) {
@@ -690,16 +687,11 @@ var playState = {
 		var i,p;
 		for (i=0; i<this.numPlayers; i++) {
 			p = this.players[i];
-			if (player.status == STATUS_ALIVE) {
-
-				// REWIND STATE
+			if (i != player.index && player.status == STATUS_ALIVE) {
 				p.status = STATUS_REWIND;
-				var tile = getTile(p.head.x, p.head.y);
-				this.bodyParts[tile.x][tile.y].heads--;
-
 			}
 		}
-		// game.state.start("end");
+		game.state.start("end");
 		game.global.playerScores[player.index]++;
 		game.global.lastWinner = player.index;
 		// this.scoreSound = game.add.sound('Score',0.75,false);
@@ -785,11 +777,7 @@ var playState = {
 
 	},
 
-	dismemberDeadBodyParts: function(tileX, tileY) {
-		// TODO: dismember surrounding dead body parts (with head = 0)
-	},
-
-	rewindPlayer: function(pi, dt) {
+	rewindPlayer: function(i, dt) {
 
 		var player = this.players[pi];
 		if (player.status != STATUS_REWIND) {
@@ -805,67 +793,18 @@ var playState = {
 		var tile = getTile(x,y);
 		var center = getCenterPixel(x,y);
 
-		// next position
-		var nx = x+dx;
-		var ny = y+dy;
-
 		// determine if we have passed the center of the tile
 		var passedCenterX = (dx > 0 && nx > center.x) || (dx < 0 && nx < center.x);
 		var passedCenterY = (dy > 0 && ny > center.y) || (dy < 0 && ny < center.y);
 
-		var bodyPart = this.bodyParts[tile.x][tile.y];
-		var enter = bodyPart.enter;
+		if (passedCenterX) nx = center.x;
+		if (passedCenterY) ny = center.y;
 
-		// GAME OVER after done rewinding
-		if (!this.isPathTile(tile.x+enter.x, tile.y+enter.y)) {
-			game.state.start("end");
-			return;
+		if (passedCenterX || passedCenterY) {
+			// TODO: set direction to opposite of bodyPart.enter
+			// TODO: start turn tween
 		}
 
-		// pause conditions
-		var aboutToTurn = -enter.x != dir.x || -enter.y != dir.y;
-		var waitingOnOtherHead = bodyPart.heads > 0;
-		if (aboutToTurn || waitingOnOtherHead) {
-
-			if (passedCenterX) nx = center.x;
-			if (passedCenterY) ny = center.y;
-
-			if (aboutToTurn) {
-				dir.x = -bodyPart.enter.x;
-				dir.y = -bodyPart.enter.y;
-				this.tweenTurn(player, dirToAngle(dir));
-			}
-		}
-
-		// determine if we have passed the critical drawing point of the tile.
-		var pad = -8;
-		var passedDrawX = (dx > 0 && nx > (center.x+pad)) || (dx < 0 && nx < (center.x-pad));
-		var passedDrawY = (dy > 0 && ny > (center.y+pad)) || (dy < 0 && ny < (center.y-pad));
-
-		// if we crossed the drawing point of a tile, dismember dead attached
-		// bodies and retract this body part
-		if (passedDrawX || passedDrawY) {
-			bodyPart.sprite.frame = BODY_EMPTY;
-			this.dismemberDeadBodyParts(tile.x, tile.y);
-		}
-
-		// update position
-		player.head.x = nx;
-		player.head.y = ny;
-
-		// if we are entering a new tile, set its entrance adjacency
-		var newTile = getTile(nx,ny);
-		if (tile.x != newTile.x || tile.y != newTile.y) {
-			this.bodyParts[newTile.x][newTile.y].heads--;
-		}
-
-		// keep player on track
-		if (dy != 0) {
-			this.pullTowardTrack(player, 'x', center.x, dt);
-		}
-		if (dx != 0) {
-			this.pullTowardTrack(player, 'y', center.y, dt);
-		}
 	},
 
 	update: function() {
@@ -876,7 +815,6 @@ var playState = {
 		var i;
 		for (i=0; i<this.numPlayers; i++) {
 			this.movePlayer(i, dt);
-			this.rewindPlayer(i, dt);
 		}
 
 		this.dispatchSpawn();
