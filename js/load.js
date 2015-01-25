@@ -19,6 +19,11 @@ var loadState = {
 		game.load.image('HydraTile', 'assets/HydraTile.png');
 		game.load.image('Walls', 'assets/HydraTilePac.png');
 		game.load.tilemap('map01', 'assets/tilemap.json', null, Phaser.Tilemap.TILED_JSON);
+		game.load.audio('Hydra', ['assets/Hydra.ogg', 'assets/Hydra.mp3']);
+		game.load.audio('Dead', ['assets/PlayerDead.ogg', 'assets/PlayerDead.mp3']);
+		game.load.audio('Score', ['assets/PlayerScore.ogg', 'assets/PlayerScore.mp3']);
+		game.load.audio('Spawn', ['assets/PlayerSpawn.ogg', 'assets/PlayerSpawn.mp3']);
+		game.load.audio('Space', ['assets/SpacePress.ogg', 'assets/SpacePress.mp3']);
 	},
 
 	create: function(){
