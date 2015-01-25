@@ -352,20 +352,20 @@ var playState = {
 		this.keyArrowLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
 		this.keyArrowRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 
-		this.keyArrowUp.onDown.add(   this.makePlayerTurner(0,0), this);
-		this.keyArrowDown.onDown.add( this.makePlayerTurner(0,180), this);
-		this.keyArrowLeft.onDown.add( this.makePlayerTurner(0,270), this);
-		this.keyArrowRight.onDown.add(this.makePlayerTurner(0,90), this);
+		this.keyArrowUp.onDown.add(   this.makePlayerTurner(1,0), this);
+		this.keyArrowDown.onDown.add( this.makePlayerTurner(1,180), this);
+		this.keyArrowLeft.onDown.add( this.makePlayerTurner(1,270), this);
+		this.keyArrowRight.onDown.add(this.makePlayerTurner(1,90), this);
 
 		this.keyW = game.input.keyboard.addKey(Phaser.Keyboard.W);
 		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);
 		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
 		this.keyD = game.input.keyboard.addKey(Phaser.Keyboard.D);
 
-		this.keyW.onDown.add(this.makePlayerTurner(1,0), this);
-		this.keyS.onDown.add(this.makePlayerTurner(1,180), this);
-		this.keyA.onDown.add(this.makePlayerTurner(1,270), this);
-		this.keyD.onDown.add(this.makePlayerTurner(1,90), this);
+		this.keyW.onDown.add(this.makePlayerTurner(0,0), this);
+		this.keyS.onDown.add(this.makePlayerTurner(0,180), this);
+		this.keyA.onDown.add(this.makePlayerTurner(0,270), this);
+		this.keyD.onDown.add(this.makePlayerTurner(0,90), this);
 	},
 
 	createWorld: function() {
