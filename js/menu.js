@@ -27,10 +27,12 @@ var menuState = {
 
 		this.loop = game.add.sound('Hydra',0.75,true);
 		this.loop.play();
+		this.keyPressSound = game.add.sound('Space',0.75,false);
 	},
 
 	start: function(){
 		// this.loop.destroy();
+		this.keyPressSound.play();
 		game.state.start('play');
 	}
 };

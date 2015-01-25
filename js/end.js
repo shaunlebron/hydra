@@ -24,10 +24,13 @@ var endState = {
 
 		this.music = game.add.sound('EndMusic',0.75,false);
 		this.music.play();
+
+		this.keyPressSound = game.add.sound('Space',0.75,false);
 	},
 
 	start: function(){
 		// this.loop.destroy();
+		this.keyPressSound.play();
 		game.state.start('menu');
 	}
 };
