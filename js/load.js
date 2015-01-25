@@ -24,6 +24,7 @@ var loadState = {
 		game.load.audio('Score', ['assets/PlayerScore.ogg', 'assets/PlayerScore.mp3']);
 		game.load.audio('Spawn', ['assets/PlayerSpawn.ogg', 'assets/PlayerSpawn.mp3']);
 		game.load.audio('Space', ['assets/SpacePress.ogg', 'assets/SpacePress.mp3']);
+		game.load.audio('Rewind', ['assets/HydraRewind.ogg', 'assets/HydraRewind.mp3']);
 	},
 
 	create: function(){
