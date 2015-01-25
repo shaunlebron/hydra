@@ -83,7 +83,7 @@ function tileIndexFromAll(all) {
 		12: 6,
 		13: 13,
 		14: 12,
-		15: 0, // no tile for this yet (choosing a T)
+		15: 12, // no tile for this yet (choosing a T)
 	};
 
 	return masterToIndex[master];
@@ -299,8 +299,13 @@ var playState = {
 			if (passedCenterY) ny = center.y;
 		}
 
-		// if we crossed the midpoint of a tile, set exit adjacency
-		if (passedCenterX || passedCenterY) {
+		// determine if we have passed the critical drawing point of the tile.
+		var pad = 8;
+		var passedDrawX = (dx > 0 && nx > (center.x+pad)) || (dx < 0 && nx < (center.x-pad));
+		var passedDrawY = (dy > 0 && ny > (center.y+pad)) || (dy < 0 && ny < (center.y-pad));
+
+		// if we crossed the drawing point of a tile, set exit adjacency
+		if (passedDrawX || passedDrawY) {
 			this.bodyParts[tile.x][tile.y].exits = [{ x: dir.x, y: dir.y }];
 			this.refreshBodySprite(tile.x, tile.y);
 		}
