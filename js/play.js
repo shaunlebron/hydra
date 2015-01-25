@@ -212,6 +212,7 @@ var STATUS_ALIVE = 0;
 var STATUS_DYING = 1;
 var STATUS_WAITING = 2;
 var STATUS_SPAWNING = 3;
+var STATUS_UNWIND = 4;
 
 var BODY_EMPTY = 16; // spritesheet cell for empty
 
@@ -336,6 +337,14 @@ var playState = {
 		}
 	},
 
+	makePlayerTurner: function(pi, angle) {
+		return function() {
+			if (this.players[pi].status == STATUS_ALIVE) {
+				this.tryTurn(pi, angle);
+			}
+		};
+	},
+
 	setupPlayerControls: function() {
 
 		this.keyArrowUp = game.input.keyboard.addKey(Phaser.Keyboard.UP);
@@ -343,20 +352,20 @@ var playState = {
 		this.keyArrowLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
 		this.keyArrowRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 
-		this.keyArrowUp.onDown.add(function() {    this.tryTurn(0,0); }, this);
-		this.keyArrowDown.onDown.add(function() {  this.tryTurn(0,180); }, this);
-		this.keyArrowLeft.onDown.add(function() {  this.tryTurn(0,270); }, this);
-		this.keyArrowRight.onDown.add(function() { this.tryTurn(0,90); }, this);
+		this.keyArrowUp.onDown.add(   this.makePlayerTurner(0,0), this);
+		this.keyArrowDown.onDown.add( this.makePlayerTurner(0,180), this);
+		this.keyArrowLeft.onDown.add( this.makePlayerTurner(0,270), this);
+		this.keyArrowRight.onDown.add(this.makePlayerTurner(0,90), this);
 
 		this.keyW = game.input.keyboard.addKey(Phaser.Keyboard.W);
 		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);
 		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
 		this.keyD = game.input.keyboard.addKey(Phaser.Keyboard.D);
 
-		this.keyW.onDown.add(function() { this.tryTurn(1,0); }, this);
-		this.keyS.onDown.add(function() { this.tryTurn(1,180); }, this);
-		this.keyA.onDown.add(function() { this.tryTurn(1,270); }, this);
-		this.keyD.onDown.add(function() { this.tryTurn(1,90); }, this);
+		this.keyW.onDown.add(this.makePlayerTurner(1,0), this);
+		this.keyS.onDown.add(this.makePlayerTurner(1,180), this);
+		this.keyA.onDown.add(this.makePlayerTurner(1,270), this);
+		this.keyD.onDown.add(this.makePlayerTurner(1,90), this);
 	},
 
 	createWorld: function() {
@@ -596,6 +605,7 @@ var playState = {
 	},
 
 	killPlayer: function(player, tile) {
+		// TODO: kick off bomb animation
 		player.status = STATUS_WAITING;
 		setTimeout(function(){
 			player.head.kill();
@@ -608,6 +618,17 @@ var playState = {
 
 		}.bind(this), 300);
 
+	},
+
+	crownWinner: function(player, tile) {
+		this.person.status = PERSON_EATEN;
+		var i,p;
+		for (i=0; i<this.numPlayers; i++) {
+			p = this.players[i];
+			if (i != player.index) {
+				p.status = STATUS_UNWIND;
+			}
+		}
 	},
 
 	movePlayer: function (pi, dt) {
@@ -640,8 +661,15 @@ var playState = {
 			if (passedCenterY) ny = center.y;
 
 			if (this.getAvailableDirections(tile.x, tile.y).length == 0) {
-				// TODO: win if found person
-				this.killPlayer(player, tile);
+				if (tile.x == this.person.tileX && tile.y == this.person.tileY) {
+					this.crownWinner(player);
+				}
+				else {
+					this.killPlayer(player, tile);
+				}
+
+				// EXIT EARLY
+				return;
 			}
 		}
 
