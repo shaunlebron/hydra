@@ -201,6 +201,13 @@ function shuffle(array) {
   return array;
 }
 
+var allDirs = [
+	{ x:  0, y:  1 },
+	{ x:  0, y: -1 },
+	{ x:  1, y:  0 },
+	{ x: -1, y:  0 },
+];
+
 var STATUS_ALIVE = 0;
 var STATUS_DYING = 1;
 var STATUS_WAITING = 2;
@@ -395,35 +402,73 @@ var playState = {
 		shuffle(this.spawnLocations);
 	},
 
-	emptyTile: function(tileX, tileY) {
+	isPathTile: function(tileX, tileY) {
 		var collide = this.map.getTile(tileX, tileY, this.collideLayer);
 		if (collide) {
 			collide = collide.index;
 		}
-		var body;
+		return (collide === 1);
+	},
+
+	isEdgeTile: function(tileX, tileY) {
+		return (
+				tileX == 0 ||
+				tileY == 0 ||
+				tileX == (this.map.width - 1) ||
+				tileY == (this.map.height - 1));
+	},
+
+	isBodyTile: function(tileX, tileY) {
+		var body = null;
 		try {
 			body = this.bodyParts[tileX][tileY].enter;
 		}
 		catch (e) {}
-		
-		var onPath =		 (collide === 1);
-		var bodyAbsent = (body == null);
+		return body != null;
+	},
 
-		return (onPath && bodyAbsent);
+	canPersonTeleportHere: function(tileX, tileY) {
+		return (
+				this.isEmptyPathTile(tileX, tileY) &&
+				!this.isEdgeTile(tileX, tileY) &&
+				this.getPathDirections(tileX, tileY).length == 1);
+	},
+
+	getTeleportableTiles: function() {
+		var x,y;
+		var tiles = [];
+		for (x=0; x<this.map.width; x++) {
+			for (y=0; y<this.map.height; y++) {
+				if (this.canPersonTeleportHere(x,y)) {
+					tiles.push({x: x, y: y});
+				}
+			}
+		}
+		return tiles;
+	},
+
+	isEmptyPathTile: function(tileX, tileY) {
+		return (
+				this.isPathTile(tileX, tileY) &&
+				!this.isBodyTile(tileX, tileY));
+	},
+
+	getPathDirections: function(tileX, tileY) {
+		var dirs = [];
+		for (i=0; i<4; i++) {
+			var dir = allDirs[i];
+			if (this.isPathTile(tileX+dir.x, tileY+dir.y)) {
+				dirs.push(dir);
+			}
+		}
+		return dirs;
 	},
 
 	getAvailableDirections: function(tileX, tileY) {
-		var dirsToCheck = [
-			{ x:  0, y:  1 },
-			{ x:  0, y: -1 },
-			{ x:  1, y:  0 },
-			{ x: -1, y:  0 },
-		];
 		var dirs = [];
 		for (i=0; i<4; i++) {
-
-			var dir = dirsToCheck[i];
-			if (this.emptyTile(tileX+dir.x, tileY+dir.y)) {
+			var dir = allDirs[i];
+			if (this.isEmptyPathTile(tileX+dir.x, tileY+dir.y)) {
 				dirs.push(dir);
 			}
 		}
@@ -442,7 +487,7 @@ var playState = {
 
 		var dir = angleToDir(targetAngle);
 		var tile = getTile(head.x, head.y);
-		if (!this.emptyTile(tile.x+dir.x, tile.y+dir.y)) {
+		if (!this.isEmptyPathTile(tile.x+dir.x, tile.y+dir.y)) {
 			player.nextAngle = targetAngle;
 			return;
 		}
@@ -519,7 +564,7 @@ var playState = {
 		var passedCenterY = (dy > 0 && ny > center.y) || (dy < 0 && ny < center.y);
 
 		// stop at tile midpoint if next tile is blocked
-		if (!this.emptyTile(tile.x+dir.x, tile.y+dir.y)) {
+		if (!this.isEmptyPathTile(tile.x+dir.x, tile.y+dir.y)) {
 			if (passedCenterX) nx = center.x;
 			if (passedCenterY) ny = center.y;
 
