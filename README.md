@@ -2,7 +2,7 @@
 
 <img src="screens/title.png" width="238px"> <img src="screens/play.png" width="238px"> <img src="screens/end.png" width="238px">
 
-A mini-game for [Global Game Jam 2015](http://globalgamejam.org/).
+A mini-game for [Global Game Jam 2015](http://globalgamejam.org/) made in 48 hours.
 
 The theme is "What do we do now?"
 
