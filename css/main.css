@@ -1,3 +1,7 @@
+@font-face { font-family: 'Hydra'; src: url('6809%20chargen.ttf'); }
+
+.hiddenText { font-family: 'Hydra' ; visibility: hidden;}
+
 
 html{
 	text-align: center;
