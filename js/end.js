@@ -36,6 +36,7 @@ var endState = {
 		spaceKey.onDown.addOnce(this.start, this);
 
 		this.music = game.add.sound('EndMusic',0.75,false);
+		game.state.states.menu.loop.destroy();
 		this.music.play();
 
 		this.keyPressSound = game.add.sound('Space',0.75,false);
@@ -44,6 +45,7 @@ var endState = {
 	start: function(){
 		// this.loop.destroy();
 		this.keyPressSound.play();
+		this.music.destroy()
 		game.state.start('menu');
 	}
 };
