@@ -145,10 +145,10 @@ var playState = {
 		var startTile = { x: 0, y: 6 };
 		var size = game.global.tileSize;
 
-		this.initAdjacency();
+		this.initBody();
 
 		// initialize adjacency of first tile;
-		var a = this.adjacency[startTile.x][startTile.y];
+		var a = this.bodyParts[startTile.x][startTile.y];
 		a.enter = {x: -1, y: 0};
 
 		this.head = game.add.sprite(startTile.x*size, (startTile.y+0.5)*size, 'head');
@@ -178,26 +178,26 @@ var playState = {
 		return s;
 	},
 
-	initAdjacency: function() {
-		var adj = [];
+	initBody: function() {
+		var bodyParts = [];
 		var x,y;
 		for (x=0; x<this.map.width; x++) {
-			adj[x] = [];
+			bodyParts[x] = [];
 			for (y=0; y<this.map.height; y++) {
-				adj[x][y] = {
+				bodyParts[x][y] = {
 					enter: null,
 					exits: [],
-					body: this.makeBodySprite(x,y),
+					sprite: this.makeBodySprite(x,y),
 				};
 			}
 		}
-		this.adjacency = adj;
+		this.bodyParts = bodyParts;
 	},
 
-	refreshBodyTile: function(tileX, tileY) {
-		var adj = this.adjacency[tileX][tileY];
-		var index = tileIndexFromAdjacency(adj)-1;
-		adj.body.frame = index;
+	refreshBodySprite: function(tileX, tileY) {
+		var bodyPart = this.bodyParts[tileX][tileY];
+		var index = tileIndexFromAdjacency(bodyPart)-1;
+		bodyPart.sprite.frame = index;
 	},
 
 	emptyTile: function(tileX, tileY) {
@@ -207,12 +207,12 @@ var playState = {
 		}
 		var body;
 		try {
-			body = this.adjacency[tileX][tileY].body.frame;
+			body = this.bodyParts[tileX][tileY].sprite.frame;
 		}
 		catch (e) {}
 		
 		var onPath =		  (collide === 1);
-		var bodyPresent = (body === 0);
+		var bodyPresent = (body < 13);
 
 		return (onPath && !bodyPresent);
 	},
@@ -301,8 +301,8 @@ var playState = {
 
 		// if we crossed the midpoint of a tile, set exit adjacency
 		if (passedCenterX || passedCenterY) {
-			this.adjacency[tile.x][tile.y].exits = [{ x: dir.x, y: dir.y }];
-			this.refreshBodyTile(tile.x, tile.y);
+			this.bodyParts[tile.x][tile.y].exits = [{ x: dir.x, y: dir.y }];
+			this.refreshBodySprite(tile.x, tile.y);
 		}
 
 		// update position
@@ -312,7 +312,7 @@ var playState = {
 		// if we are entering a new tile, set its entrance adjacency
 		var newTile = getTile(nx,ny);
 		if (tile.x != newTile.x || tile.y != newTile.y) {
-			this.adjacency[newTile.x][newTile.y].enter = { x: -dir.x, y: -dir.y };
+			this.bodyParts[newTile.x][newTile.y].enter = { x: -dir.x, y: -dir.y };
 		}
 
 		// keep player on track
