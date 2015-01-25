@@ -132,7 +132,6 @@ var playState = {
 		this.map.addTilesetImage('Walls');
 		this.collideLayer = this.map.createLayer('Collide');
 		this.wallLayer = this.map.createLayer('Walls');
-		this.bodyLayer = this.map.createLayer('Body');
 	},
 
 	createPlayer: function() {
@@ -145,6 +144,13 @@ var playState = {
 
 		var startTile = { x: 0, y: 6 };
 		var size = game.global.tileSize;
+
+		this.initAdjacency();
+
+		// initialize adjacency of first tile;
+		var a = this.adjacency[startTile.x][startTile.y];
+		a.enter = {x: -1, y: 0};
+
 		this.head = game.add.sprite(startTile.x*size, (startTile.y+0.5)*size, 'head');
 		this.head.anchor.setTo(0.5,0.5);
 		this.head.frame = 0;
@@ -161,13 +167,15 @@ var playState = {
 		this.keyDown.onDown.add(function() {  this.tryTurn(180); }, this);
 		this.keyLeft.onDown.add(function() {  this.tryTurn(270); }, this);
 		this.keyRight.onDown.add(function() { this.tryTurn(90); }, this);
+	},
 
-		this.initAdjacency();
-
-		// initialize adjacency of first tile;
-		var a = this.adjacency[startTile.x][startTile.y];
-		a.enter = {x: -1, y: 0};
-
+	makeBodySprite: function(tileX, tileY) {
+		var size = game.global.tileSize;
+		var x = tileX*size;
+		var y = tileY*size;
+		var s = game.add.sprite(x, y, 'BodyBlue');
+		s.frame = 13; // empty cell
+		return s;
 	},
 
 	initAdjacency: function() {
@@ -176,7 +184,11 @@ var playState = {
 		for (x=0; x<this.map.width; x++) {
 			adj[x] = [];
 			for (y=0; y<this.map.height; y++) {
-				adj[x][y] = {enter: null, exits: []};
+				adj[x][y] = {
+					enter: null,
+					exits: [],
+					body: this.makeBodySprite(x,y),
+				};
 			}
 		}
 		this.adjacency = adj;
@@ -184,19 +196,20 @@ var playState = {
 
 	refreshBodyTile: function(tileX, tileY) {
 		var adj = this.adjacency[tileX][tileY];
-		var index = tileIndexFromAdjacency(adj);
-		this.map.putTile(index, tileX, tileY, this.bodyLayer);
+		var index = tileIndexFromAdjacency(adj)-1;
+		adj.body.frame = index;
 	},
 
 	emptyTile: function(tileX, tileY) {
 		var collide = this.map.getTile(tileX, tileY, this.collideLayer);
-		var body =		this.map.getTile(tileX, tileY, this.bodyLayer);
 		if (collide) {
 			collide = collide.index;
 		}
-		if (body) {
-			body = body.index;
+		var body;
+		try {
+			body = this.adjacency[tileX][tileY].body.frame;
 		}
+		catch (e) {}
 		
 		var onPath =		  (collide === 1);
 		var bodyPresent = (body === 0);
