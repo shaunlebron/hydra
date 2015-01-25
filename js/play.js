@@ -336,6 +336,9 @@ var playState = {
 		// if we are entering a new tile, set its entrance adjacency
 		var newTile = getTile(nx,ny);
 		if (tile.x != newTile.x || tile.y != newTile.y) {
+			// TODO: add bodySprite for this player's color in this new tile
+			//	- initialize frame to 13 for empty
+			//	- player.head.bringToTop()
 			// TODO: add to spawn locations if other paths are open from tile
 			this.bodyParts[newTile.x][newTile.y].enter = { x: -dir.x, y: -dir.y };
 		}
