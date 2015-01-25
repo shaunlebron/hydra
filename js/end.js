@@ -1,6 +1,6 @@
 // menu.js
 
-var menuState = {
+var endState = {
 
 	create: function  () {
 
@@ -8,8 +8,8 @@ var menuState = {
 		// 	{ font: '100px ' + game.global.font, fill: '#ffffff', align: 'center'});
 		// nameLabel.anchor.setTo(0.5,0.5);
 
-		var titleScreen = game.add.image(game.world.centerX, game.world.centerY, 'title');
-		titleScreen.anchor.setTo(0.5,0.5);
+		var endScreen = game.add.image(game.world.centerX, game.world.centerY, 'end');
+		endScreen.anchor.setTo(0.5,0.5);
 
 		// var instructLabel = game.add.text(game.world.centerX, game.world.height-275,
 		// 	'insert some instructions\nright here maybe...',
@@ -24,14 +24,11 @@ var menuState = {
 
 		var spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 		spaceKey.onDown.addOnce(this.start, this);
-
-		this.loop = game.add.sound('intro',0.75,true);
-		this.loop.play();
 	},
 
 	start: function(){
 		// this.loop.destroy();
-		game.state.start('play');
+		game.state.start('menu');
 	}
 };
 
