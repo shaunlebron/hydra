@@ -17,7 +17,7 @@
          "name":"Collide",
          "opacity":0.340000003576279,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":16,
          "x":0,
          "y":0
@@ -64,6 +64,21 @@
          "imagewidth":320,
          "margin":0,
          "name":"Walls",
+         "properties":
+            {
+
+            },
+         "spacing":0,
+         "tileheight":64,
+         "tilewidth":64
+        }, 
+        {
+         "firstgid":32,
+         "image":"HydraBodyBlue.png",
+         "imageheight":128,
+         "imagewidth":576,
+         "margin":0,
+         "name":"BodyBlue",
          "properties":
             {
 

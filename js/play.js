@@ -137,8 +137,7 @@ var playState = {
 
 	createPlayer: function() {
 		this.player = {
-			dirX: 1,
-			dirY: 0,
+			dir: { x: 1, y: 0},
 			speed: 400,
 			frame: 0,
 			status: STATUS_ALIVE,
@@ -235,8 +234,8 @@ var playState = {
 			return;
 		}
 
-		this.player.dirX = dir.x;
-		this.player.dirY = dir.y;
+		this.player.dir.x = dir.x;
+		this.player.dir.y = dir.y;
 
 		var a = normalizeAngle(this.head.angle);
 		var da = targetAngle - a;
@@ -266,8 +265,9 @@ var playState = {
 
 		var x = this.head.x;
 		var y = this.head.y;
-		var dx = this.player.dirX * this.player.speed * dt;
-		var dy = this.player.dirY * this.player.speed * dt;
+		var dir = this.player.dir;
+		var dx = dir.x * this.player.speed * dt;
+		var dy = dir.y * this.player.speed * dt;
 
 		var tile = getTile(x,y);
 		var center = getCenterPixel(x,y);
@@ -276,21 +276,31 @@ var playState = {
 		var nx = x+dx;
 		var ny = y+dy;
 
+		// determine if we have passed the center of the tile
+		var passedCenterX = (dx > 0 && nx > center.x) || (dx < 0 && nx < center.x);
+		var passedCenterY = (dy > 0 && ny > center.y) || (dy < 0 && ny < center.y);
+
 		// stop at tile midpoint if next tile is blocked
-		if (!this.emptyTile(tile.x+this.player.dirX, tile.y+this.player.dirY)) {
-			if ((dx > 0 && nx > center.x) ||
-					(dx < 0 && nx < center.x)) {
-				nx = center.x;
-			}
-			if ((dy > 0 && ny > center.y) ||
-					(dy < 0 && ny < center.y)) {
-				ny = center.y;
-			}
+		if (!this.emptyTile(tile.x+dir.x, tile.y+dir.y)) {
+			if (passedCenterX) nx = center.x;
+			if (passedCenterY) ny = center.y;
+		}
+
+		// if we crossed the midpoint of a tile, set exit adjacency
+		if (passedCenterX || passedCenterY) {
+			this.adjacency[tile.x][tile.y].exits = [{ x: dir.x, y: dir.y }];
+			this.refreshBodyTile(tile.x, tile.y);
 		}
 
 		// update position
 		this.head.x = nx;
 		this.head.y = ny;
+
+		// if we are entering a new tile, set its entrance adjacency
+		var newTile = getTile(nx,ny);
+		if (tile.x != newTile.x || tile.y != newTile.y) {
+			this.adjacency[newTile.x][newTile.y].enter = { x: -dir.x, y: -dir.y };
+		}
 
 		// keep player on track
 		if (dy != 0) {

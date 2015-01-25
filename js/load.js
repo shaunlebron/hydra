@@ -11,6 +11,7 @@ var loadState = {
 		progressBar.anchor.setTo(0.5,0.5);
 		game.load.setPreloadSprite(progressBar);
 		game.load.image('title', 'assets/HydraTitle.png');
+		game.load.image('BodyBlue', 'assets/HydraBodyBlue.png');
 		game.load.spritesheet('head', 'assets/HydraAnim.png', 64, 64);
 		game.load.image('HydraTile', 'assets/HydraTile.png');
 		game.load.image('Walls', 'assets/HydraTilePac.png');
