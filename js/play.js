@@ -116,12 +116,12 @@ var playState = {
 		this.player = {
 			dirX: 1,
 			dirY: 0,
-			speed: 1000,
+			speed: 400,
 			frame: 0,
 			status: STATUS_ALIVE,
 		};
 
-		this.head = game.add.sprite(64, game.global.tileSize * 6.5 , 'head');
+		this.head = game.add.sprite(0, game.global.tileSize * 6.5 , 'head');
 		this.head.anchor.setTo(0.5,0.5);
 		this.head.frame = 0;
 		this.head.animations.add('eat', [0,1],8,true);
