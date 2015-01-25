@@ -297,9 +297,21 @@ var playState = {
 		var player = this.players[i];
 		player.dir = { x: dir.x, y: dir.y };
 
+		// add exit to previous body tile if applicable
+		try {
+			var tx = tile.x-dir.x;
+			var ty = tile.y-dir.y;
+			this.bodyParts[tx][ty].exits.push({
+				x: dir.x,
+				y: dir.y,
+			});
+			this.refreshBodySprite(tx,ty);
+		}
+		catch (e) {}
+
 		// create head sprite
 		var spawn = getSpawnPixel(dir, tile);
-		player.head = game.add.sprite(spawn.x, spawn.y, 'head');
+		player.head = game.add.sprite(spawn.x, spawn.y, game.global.playerHeads[i]);
 		player.head.anchor.setTo(0.5,0.5);
 		player.head.frame = 0;
 		player.head.animations.add('eat', [0,1],8,true);
@@ -316,7 +328,7 @@ var playState = {
 		var size = game.global.tileSize;
 		var x = tileX*size;
 		var y = tileY*size;
-		var s = game.add.sprite(x, y, game.global.playerColors[pi]);
+		var s = game.add.sprite(x, y, game.global.playerBodies[pi]);
 		s.frame = BODY_EMPTY;
 		return s;
 	},
