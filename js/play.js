@@ -43,6 +43,45 @@ var STATUS_SPAWNING = 3;
 
 var playState = {
 
+	create: function() {
+		this.createWorld();
+	},
+
+	createWorld: function() {
+		this.map = game.add.tilemap('map01');
+		this.map.addTilesetImage('HydraTile');
+		this.map.addTilesetImage('Walls');
+		this.collideLayer = this.map.createLayer('Collide');
+		this.wallLayer = this.map.createLayer('Walls');
+		this.bodyLayer = this.map.createLayer('Body');
+
+
+		this.player = {
+			dirX: 1,
+			dirY: 0,
+			speed: 400,
+			frame: 0,
+			status: STATUS_ALIVE,
+		};
+
+		this.head = game.add.sprite(0, game.global.tileSize * 6.5 , 'head');
+		this.head.anchor.setTo(0.5,0.5);
+		this.head.frame = 0;
+		this.head.animations.add('eat', [0,1],8,true);
+		this.head.animations.play('eat');
+		this.head.angle = 90;
+
+		this.keyUp = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+		this.keyDown = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+		this.keyLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+		this.keyRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+
+		this.keyUp.onDown.add(function() {    this.tryTurn(0); }, this);
+		this.keyDown.onDown.add(function() {  this.tryTurn(180); }, this);
+		this.keyLeft.onDown.add(function() {  this.tryTurn(270); }, this);
+		this.keyRight.onDown.add(function() { this.tryTurn(90); }, this);
+	},
+
 	emptyTile: function(tileX, tileY) {
 		var collide = this.map.getTile(tileX, tileY, this.collideLayer);
 		var body =		this.map.getTile(tileX, tileY, this.bodyLayer);
@@ -102,45 +141,6 @@ var playState = {
 		}
 
 		game.add.tween(this.head).to({angle: this.head.angle+da}, 100, Phaser.Easing.Linear.None, true);
-	},
-
-	createWorld: function() {
-		this.map = game.add.tilemap('map01');
-		this.map.addTilesetImage('HydraTile');
-		this.map.addTilesetImage('Walls');
-		this.collideLayer = this.map.createLayer('Collide');
-		this.wallLayer = this.map.createLayer('Walls');
-		this.bodyLayer = this.map.createLayer('Body');
-
-
-		this.player = {
-			dirX: 1,
-			dirY: 0,
-			speed: 400,
-			frame: 0,
-			status: STATUS_ALIVE,
-		};
-
-		this.head = game.add.sprite(0, game.global.tileSize * 6.5 , 'head');
-		this.head.anchor.setTo(0.5,0.5);
-		this.head.frame = 0;
-		this.head.animations.add('eat', [0,1],8,true);
-		this.head.animations.play('eat');
-		this.head.angle = 90;
-
-		this.keyUp = game.input.keyboard.addKey(Phaser.Keyboard.UP);
-		this.keyDown = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
-		this.keyLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
-		this.keyRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
-
-		this.keyUp.onDown.add(function() {    this.tryTurn(0); }, this);
-		this.keyDown.onDown.add(function() {  this.tryTurn(180); }, this);
-		this.keyLeft.onDown.add(function() {  this.tryTurn(270); }, this);
-		this.keyRight.onDown.add(function() { this.tryTurn(90); }, this);
-	},
-
-	create: function() {
-		this.createWorld();
 	},
 
 	pullTowardTrack: function(dim, trackX, dt) {
