@@ -80,9 +80,12 @@ var playState = {
 
 	tryTurn: function(targetAngle) {
 
+		this.nextAngle = null;
+
 		var dir = angleToDir(targetAngle);
 		var tile = getTile(this.head.x, this.head.y);
 		if (!this.emptyTile(tile.x+dir.x, tile.y+dir.y)) {
+			this.nextAngle = targetAngle;
 			return;
 		}
 
@@ -162,9 +165,11 @@ var playState = {
 		var tile = getTile(x,y);
 		var center = getCenterPixel(x,y);
 
+		// next position
 		var nx = x+dx;
 		var ny = y+dy;
 
+		// stop at tile midpoint if next tile is blocked
 		if (!this.emptyTile(tile.x+this.player.dirX, tile.y+this.player.dirY)) {
 			if ((dx > 0 && nx > center.x) ||
 					(dx < 0 && nx < center.x)) {
@@ -176,14 +181,21 @@ var playState = {
 			}
 		}
 
+		// update position
 		this.head.x = nx;
 		this.head.y = ny;
 
+		// keep player on track
 		if (dy != 0) {
 			this.pullTowardTrack('x', center.x, dt);
 		}
 		if (dx != 0) {
 			this.pullTowardTrack('y', center.y, dt);
+		}
+
+		// try last failed attempted turn if it is available now
+		if (this.nextAngle != null) {
+			this.tryTurn(this.nextAngle);
 		}
 
 	},
