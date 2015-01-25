@@ -393,6 +393,7 @@ var playState = {
 			var tile = loc.tile;
 
 			this.spawnPlayer(pi, dir, tile);
+
 		}
 	},
 
@@ -431,6 +432,8 @@ var playState = {
 
 		// bring to life
 		player.status = STATUS_ALIVE;
+		this.spawnSound = game.add.sound('Spawn',0.75,false);
+		this.spawnSound.play();
 	},
 
 	makeBodySprite: function(pi, tileX, tileY) {
@@ -652,6 +655,8 @@ var playState = {
 			x: tile.x,
 			y: tile.y,
 		});
+		this.deadSound = game.add.sound('Dead',0.75,false);
+		this.deadSound.play();
 	},
 
 	killPlayer: function(player, tile) {
@@ -686,6 +691,8 @@ var playState = {
 				p.status = STATUS_REWIND;
 			}
 		}
+		// this.scoreSound = game.add.sound('Score',0.75,false);
+		// this.scoreSound.play();
 	},
 
 	movePlayer: function (pi, dt) {
