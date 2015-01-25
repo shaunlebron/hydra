@@ -166,6 +166,21 @@ function getSpawnPixel(dir, tile) {
 	};
 }
 
+function getDeadBodyIndexFromDir(dir) {
+	if (dir.x == -1) {
+		return 15;
+	}
+	else if (dir.x == 1) {
+		return 13;
+	}
+	else if (dir.y == -1) {
+		return 8;
+	}
+	else if (dir.y == 1) {
+		return 14;
+	}
+}
+
 // source: http://stackoverflow.com/a/2450976/142317
 function shuffle(array) {
   var currentIndex = array.length, temporaryValue, randomIndex ;
@@ -191,7 +206,7 @@ var STATUS_DYING = 1;
 var STATUS_WAITING = 2;
 var STATUS_SPAWNING = 3;
 
-var BODY_EMPTY = 13; // spritesheet cell for empty
+var BODY_EMPTY = 16; // spritesheet cell for empty
 
 var playState = {
 
@@ -455,16 +470,28 @@ var playState = {
 		}
 	},
 
-	addDeadHead: function(tileX, tileY) {
+	addDeadHead: function(dir, tile) {
+		var sprite = this.bodyParts[tile.x][tile.y].sprite;
+		sprite.frame = getDeadBodyIndexFromDir(dir);
+		this.deadHeads.push({
+			x: tile.x,
+			y: tile.y,
+		});
 	},
 
-	killPlayer: function(player) {
+	killPlayer: function(player, tile) {
 		player.status = STATUS_WAITING;
-		// TODO: remove player.head from game
-		// TODO: this.addDeadHead();
 		setTimeout(function(){
-			this.spawnQueue.push(player.index);
-		}.bind(this), 500);
+			player.head.kill();
+
+			this.addDeadHead(player.dir, tile);
+
+			setTimeout(function(){
+				this.spawnQueue.push(player.index);
+			}.bind(this), 500);
+
+		}.bind(this), 300);
+
 	},
 
 	movePlayer: function (pi, dt) {
@@ -498,7 +525,7 @@ var playState = {
 
 			if (this.getAvailableDirections(tile.x, tile.y).length == 0) {
 				// TODO: win if found person
-				this.killPlayer(player);
+				this.killPlayer(player, tile);
 			}
 		}
 
