@@ -25,6 +25,17 @@ function normalizeAngle(a) {
 	return a;
 }
 
+function angleToDir(a) {
+	var dx,dy;
+	switch (normalizeAngle(a)) {
+		case 0:   dx =  0; dy = -1; break;
+		case 90:  dx =  1; dy =  0; break;
+		case 180: dx =  0; dy =  1; break;
+		case 270: dx = -1; dy =  0; break;
+	}
+	return { x: dx, y: dy };
+}
+
 var STATUS_ALIVE = 0;
 var STATUS_DYING = 1;
 var STATUS_DEAD = 2;
@@ -67,13 +78,18 @@ var playState = {
 		return turns;
 	},
 
-	rotateHead: function(targetAngle) {
+	tryTurn: function(targetAngle) {
+
+		var dir = angleToDir(targetAngle);
+		var tile = getTile(this.head.x, this.head.y);
+		if (!this.emptyTile(tile.x+dir.x, tile.y+dir.y)) {
+			return;
+		}
+
+		this.player.dirX = dir.x;
+		this.player.dirY = dir.y;
 
 		var a = normalizeAngle(this.head.angle);
-
-		// TODO: verify if we can turn
-
-
 		var da = targetAngle - a;
 		if (da > 180) {
 			da -= 360;
@@ -83,26 +99,6 @@ var playState = {
 		}
 
 		game.add.tween(this.head).to({angle: this.head.angle+da}, 100, Phaser.Easing.Linear.None, true);
-
-		var a = normalizeAngle(targetAngle);
-		switch (a) {
-			case 0:
-				this.player.dirX = 0;
-				this.player.dirY = -1;
-				break;
-			case 90:
-				this.player.dirX = 1;
-				this.player.dirY = 0;
-				break;
-			case 180:
-				this.player.dirX = 0;
-				this.player.dirY = 1;
-				break;
-			case 270:
-				this.player.dirX = -1;
-				this.player.dirY = 0;
-				break;
-		}
 	},
 
 	createWorld: function() {
@@ -134,10 +130,10 @@ var playState = {
 		this.keyLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
 		this.keyRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 
-		this.keyUp.onDown.add(function() {    this.rotateHead(0); }, this);
-		this.keyDown.onDown.add(function() {  this.rotateHead(180); }, this);
-		this.keyLeft.onDown.add(function() {  this.rotateHead(270); }, this);
-		this.keyRight.onDown.add(function() { this.rotateHead(90); }, this);
+		this.keyUp.onDown.add(function() {    this.tryTurn(0); }, this);
+		this.keyDown.onDown.add(function() {  this.tryTurn(180); }, this);
+		this.keyLeft.onDown.add(function() {  this.tryTurn(270); }, this);
+		this.keyRight.onDown.add(function() { this.tryTurn(90); }, this);
 	},
 
 	create: function() {
