@@ -297,6 +297,18 @@ var playState = {
 		var player = this.players[i];
 		player.dir = { x: dir.x, y: dir.y };
 
+		// add exit to previous body tile if applicable
+		try {
+			var tx = tile.x-dir.x;
+			var ty = tile.y-dir.y;
+			this.bodyParts[tx][ty].exits.push({
+				x: dir.x,
+				y: dir.y,
+			});
+			this.refreshBodySprite(tx,ty);
+		}
+		catch (e) {}
+
 		// create head sprite
 		var spawn = getSpawnPixel(dir, tile);
 		player.head = game.add.sprite(spawn.x, spawn.y, game.global.playerHeads[i]);
