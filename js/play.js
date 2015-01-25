@@ -113,7 +113,7 @@ var playState = {
 		this.player = {
 			dirX: 1,
 			dirY: 0,
-			speed: 200,
+			speed: 1000,
 			frame: 0,
 			status: STATUS_ALIVE,
 		};
@@ -162,15 +162,30 @@ var playState = {
 		var tile = getTile(x,y);
 		var center = getCenterPixel(x,y);
 
+		var nx = x+dx;
+		var ny = y+dy;
+
+		if (!this.emptyTile(tile.x+this.player.dirX, tile.y+this.player.dirY)) {
+			if ((dx > 0 && nx > center.x) ||
+					(dx < 0 && nx < center.x)) {
+				nx = center.x;
+			}
+			if ((dy > 0 && ny > center.y) ||
+					(dy < 0 && ny < center.y)) {
+				ny = center.y;
+			}
+		}
+
+		this.head.x = nx;
+		this.head.y = ny;
+
 		if (dy != 0) {
 			this.pullTowardTrack('x', center.x, dt);
 		}
-		else if (dx != 0) {
+		if (dx != 0) {
 			this.pullTowardTrack('y', center.y, dt);
 		}
 
-		this.head.x += dx;
-		this.head.y += dy;
 	},
 
 	update: function() {
