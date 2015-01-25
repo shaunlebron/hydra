@@ -25,7 +25,7 @@ var menuState = {
 		var spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 		spaceKey.onDown.addOnce(this.start, this);
 
-		this.loop = game.add.sound('intro',0.75,true);
+		this.loop = game.add.sound('Hydra',0.75,true);
 		this.loop.play();
 	},
 
