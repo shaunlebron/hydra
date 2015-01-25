@@ -16,8 +16,8 @@ var endState = {
 			{ font: '150px ' + 'Hydra', fill: '#ffffff'});
 		player2Label.anchor.setTo(0.5,0.5);
 
-		player1Label.text = '0';
-		player2Label.text ='0';
+		player1Label.text = game.global.playerScores[0];
+		player2Label.text = game.global.playerScores[1];
 
 		var spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 		spaceKey.onDown.addOnce(this.start, this);

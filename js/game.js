@@ -6,6 +6,7 @@ game.global = {
 	tileSize: 64,
 	playerBodies: ['BodyBlue', 'BodyPurple'],
 	playerHeads: ['HeadBlue', 'HeadPurple'],
+	playerScores: [0, 0],
 };
 
 game.state.add('boot', bootState);

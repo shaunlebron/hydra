@@ -691,6 +691,8 @@ var playState = {
 				p.status = STATUS_REWIND;
 			}
 		}
+		game.state.start("end");
+		game.global.playerScores[player.index]++;
 		// this.scoreSound = game.add.sound('Score',0.75,false);
 		// this.scoreSound.play();
 	},
@@ -775,6 +777,33 @@ var playState = {
 	},
 
 	rewindPlayer: function(i, dt) {
+
+		var player = this.players[pi];
+		if (player.status != STATUS_REWIND) {
+			return;
+		}
+
+		var x = player.head.x;
+		var y = player.head.y;
+		var dir = player.dir;
+		var dx = -dir.x * player.speed * dt; // reversing here
+		var dy = -dir.y * player.speed * dt;
+
+		var tile = getTile(x,y);
+		var center = getCenterPixel(x,y);
+
+		// determine if we have passed the center of the tile
+		var passedCenterX = (dx > 0 && nx > center.x) || (dx < 0 && nx < center.x);
+		var passedCenterY = (dy > 0 && ny > center.y) || (dy < 0 && ny < center.y);
+
+		if (passedCenterX) nx = center.x;
+		if (passedCenterY) ny = center.y;
+
+		if (passedCenterX || passedCenterY) {
+			// TODO: set direction to opposite of bodyPart.enter
+			// TODO: start turn tween
+		}
+
 	},
 
 	update: function() {
