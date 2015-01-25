@@ -391,6 +391,7 @@ var playState = {
 			var tile = loc.tile;
 
 			this.spawnPlayer(pi, dir, tile);
+
 		}
 	},
 
@@ -426,6 +427,8 @@ var playState = {
 
 		// bring to life
 		player.status = STATUS_ALIVE;
+		this.spawnSound = game.add.sound('Spawn',0.75,false);
+		this.spawnSound.play();
 	},
 
 	makeBodySprite: function(pi, tileX, tileY) {
