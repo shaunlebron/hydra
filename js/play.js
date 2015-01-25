@@ -36,6 +36,24 @@ function angleToDir(a) {
 	return { x: dx, y: dy };
 }
 
+function tileIndexFromAdjacency(adj) {
+	var enter = adj.enter;
+	var exits = adj.exits;
+
+	if (enter == null || exits.length == 0) {
+		return 0;
+	}
+
+	if (enter.x == -1) {
+	}
+	else if (enter.x == 1) {
+	}
+	else if (enter.y == -1) {
+	}
+	else if (enter.y = 1) {
+	}
+}
+
 var STATUS_ALIVE = 0;
 var STATUS_DYING = 1;
 var STATUS_DEAD = 2;
@@ -66,7 +84,9 @@ var playState = {
 			status: STATUS_ALIVE,
 		};
 
-		this.head = game.add.sprite(0, game.global.tileSize * 6.5 , 'head');
+		var startTile = { x: 0, y: 6 };
+		var size = game.global.tileSize;
+		this.head = game.add.sprite(startTile.x*size, (startTile.y+0.5)*size, 'head');
 		this.head.anchor.setTo(0.5,0.5);
 		this.head.frame = 0;
 		this.head.animations.add('eat', [0,1],8,true);
@@ -82,6 +102,31 @@ var playState = {
 		this.keyDown.onDown.add(function() {  this.tryTurn(180); }, this);
 		this.keyLeft.onDown.add(function() {  this.tryTurn(270); }, this);
 		this.keyRight.onDown.add(function() { this.tryTurn(90); }, this);
+
+		this.initAdjacency();
+
+		// initialize adjacency of first tile;
+		var a = this.adjacency[startTile.x][startTile.y];
+		a.enter = {x: -1, y: 0};
+
+	},
+
+	initAdjacency: function() {
+		var adj = [];
+		var x,y;
+		for (x=0; x<this.map.width; x++) {
+			adj[x] = [];
+			for (y=0; y<this.map.height; y++) {
+				adj[x][y] = {enter: null, exits: []};
+			}
+		}
+		this.adjacency = adj;
+	},
+
+	refreshBodyTile: function(tileX, tileY) {
+		var adj = this.adjacency[tileX][tileY];
+		var index = tileIndexFromAdjacency(adj);
+		this.map.putTile(index, tileX, tileY, this.bodyLayer);
 	},
 
 	emptyTile: function(tileX, tileY) {
