@@ -144,6 +144,18 @@ var playState = {
 		this.createWorld();
 	},
 
+	pullTowardTrack: function(dim, trackX, dt) {
+		var x = this.head[dim];
+		var dx = 2 * this.player.speed * dt;
+
+		if (x > trackX) {
+			this.head[dim] = Math.max(trackX, x - dx);
+		}
+		else if (x < trackX) {
+			this.head[dim] = Math.min(trackX, x + dx);
+		}
+	},
+
 	move: function (dt) {
 
 		var x = this.head.x;
@@ -153,6 +165,13 @@ var playState = {
 
 		var tile = getTile(x,y);
 		var center = getCenterPixel(x,y);
+
+		if (dy != 0) {
+			this.pullTowardTrack('x', center.x, dt);
+		}
+		else if (dx != 0) {
+			this.pullTowardTrack('y', center.y, dt);
+		}
 
 		this.head.x += dx;
 		this.head.y += dy;
