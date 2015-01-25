@@ -166,6 +166,26 @@ function getSpawnPixel(dir, tile) {
 	};
 }
 
+// source: http://stackoverflow.com/a/2450976/142317
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex ;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
+
 var STATUS_ALIVE = 0;
 var STATUS_DYING = 1;
 var STATUS_WAITING = 2;
@@ -201,7 +221,8 @@ var playState = {
 	makePlayer: function(i) {
 		return {
 			index: i,
-			dir: { x: 1, y: 0},
+			head: null,
+			dir: null,
 			speed: 400,
 			frame: 0,
 			status: STATUS_WAITING,
@@ -274,6 +295,7 @@ var playState = {
 	spawnPlayer: function(i, dir, tile) {
 
 		var player = this.players[i];
+		player.dir = { x: dir.x, y: dir.y };
 
 		// create head sprite
 		var spawn = getSpawnPixel(dir, tile);
@@ -331,6 +353,21 @@ var playState = {
 		player.head.bringToTop();
 	},
 
+	addSpawnLocations: function(tileX, tileY) {
+		var dirs = this.getAvailableDirections(tileX, tileY);
+		for (i=0; i<dirs.length; i++) {
+			var dir = dirs[i];
+			this.spawnLocations.push({
+				dir: { x: dir.x, y: dir.y },
+				tile: {
+					x: tileX + dir.x,
+					y: tileY + dir.y,
+				},
+			});
+		}
+		shuffle(this.spawnLocations);
+	},
+
 	emptyTile: function(tileX, tileY) {
 		var collide = this.map.getTile(tileX, tileY, this.collideLayer);
 		if (collide) {
@@ -338,33 +375,32 @@ var playState = {
 		}
 		var body;
 		try {
-			body = this.bodyParts[tileX][tileY].sprite.frame;
+			body = this.bodyParts[tileX][tileY].enter;
 		}
 		catch (e) {}
 		
 		var onPath =		 (collide === 1);
-		var bodyAbsent = (body == null || body == BODY_EMPTY);
+		var bodyAbsent = (body == null);
 
 		return (onPath && bodyAbsent);
 	},
 
-	getAvailableTurns: function(tileX, tileY) {
-		var tilesToCheck = [
-			// TODO: add direction to each element
-			{ x: tileX + 0, y: tileY + 1 },
-			{ x: tileX + 0, y: tileY - 1 },
-			{ x: tileX + 1, y: tileY + 0 },
-			{ x: tileX - 1, y: tileY + 0 },
+	getAvailableDirections: function(tileX, tileY) {
+		var dirsToCheck = [
+			{ x:  0, y:  1 },
+			{ x:  0, y: -1 },
+			{ x:  1, y:  0 },
+			{ x: -1, y:  0 },
 		];
-		var turns = [];
+		var dirs = [];
 		for (i=0; i<4; i++) {
 
-			var t = tilesToCheck[i];
-			if (this.emptyTile(t.x, t.y)) {
-				turns.push(t);
+			var dir = dirsToCheck[i];
+			if (this.emptyTile(tileX+dir.x, tileY+dir.y)) {
+				dirs.push(dir);
 			}
 		}
-		return turns;
+		return dirs;
 	},
 
 	tryTurn: function(pi, targetAngle) {
@@ -457,7 +493,7 @@ var playState = {
 		var newTile = getTile(nx,ny);
 		if (tile.x != newTile.x || tile.y != newTile.y) {
 			this.enterNewTile(player, dir, newTile);
-			// TODO: add to spawn locations if other paths are open from tile
+			this.addSpawnLocations(tile.x, tile.y);
 		}
 
 		// keep player on track
