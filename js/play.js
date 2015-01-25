@@ -693,6 +693,7 @@ var playState = {
 		}
 		game.state.start("end");
 		game.global.playerScores[player.index]++;
+		game.global.lastWinner = player.index;
 		// this.scoreSound = game.add.sound('Score',0.75,false);
 		// this.scoreSound.play();
 	},

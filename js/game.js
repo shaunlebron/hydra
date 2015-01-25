@@ -7,6 +7,7 @@ game.global = {
 	playerBodies: ['BodyBlue', 'BodyPurple'],
 	playerHeads: ['HeadBlue', 'HeadPurple'],
 	playerScores: [0, 0],
+	lastWinner: 9
 };
 
 game.state.add('boot', bootState);
