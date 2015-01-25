@@ -45,6 +45,7 @@ var playState = {
 
 	create: function() {
 		this.createWorld();
+		this.createPlayer();
 	},
 
 	createWorld: function() {
@@ -54,8 +55,9 @@ var playState = {
 		this.collideLayer = this.map.createLayer('Collide');
 		this.wallLayer = this.map.createLayer('Walls');
 		this.bodyLayer = this.map.createLayer('Body');
+	},
 
-
+	createPlayer: function() {
 		this.player = {
 			dirX: 1,
 			dirY: 0,
