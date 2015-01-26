@@ -330,6 +330,7 @@ var playState = {
 		for (i=0; i<this.numPlayers; i++) {
 			this.spawnQueue.push(i);
 		}
+		shuffle(this.spawnQueue);
 	},
 
 	initPlayers: function() {
